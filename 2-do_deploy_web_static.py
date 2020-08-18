@@ -23,26 +23,26 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """Deploy web_static in servers"""
+    """
+    Write a Fabric script (based on the file 1-pack_web_static.py) that
+    distributes an archive to your web servers, using the function do_deploy
+    """
+
     if isfile(archive_path) is False:
         return False
 
     try:
-        name = archive_path.split("/")[1].split(".")[0]
+        filename = archive_path.split("/")[1]
+        filename1 = (archive_path.split("/")[1]).split(".")[0]
+        input_path = "/data/web_static/releases/{}/".format(filename1)
         put(archive_path, "/tmp/")
-        run("mkdir -p /data/web_static/releases/{}/"
-            .format(name))
-        run("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
-            .format(name, name))
-        run("rm /tmp/{}.tgz".format(name))
-        run("mv /data/web_static/releases/{}/web_static/* \
-             /data/web_static/releases/{}/".format(name, name))
-        run("rm -rf /data/web_static/releases/{}/web_static"
-            .format(name))
-        run("rm -rf /data/web_static_current")
-        run("ln -s /data/web_static/releases/{}/ \
-             /data/web_static/current".format(name))
-
+        run("sudo mkdir -p {}".format(input_path))
+        run("sudo tar -zxvf /tmp/{} -C {}".format(filename, input_path))
+        run("sudo rm -rf /tmp/{}".format(filename))
+        run("sudo mv -n {}/web_static/* {}".format(input_path, input_path))
+        run("sudo rm -rf {}/web_static".format(input_path))
+        run("sudo rm /data/web_static/current")
+        run("sudo ln -s {} /data/web_static/current".format(input_path))
         return True
 
     except Exception:
